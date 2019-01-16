@@ -4,39 +4,21 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Animation
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.utils.Array
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
 
 class SdRogue : ApplicationAdapter() {
-    lateinit var batch: SpriteBatch
+//    lateinit var batch: SpriteBatch
     lateinit var renderer: ShapeRenderer
-    lateinit var player: Texture
-    lateinit var playerShape: TextureRegion
-    lateinit var playerAnims: List<Animation<TextureRegion>>
 
-    private val gc = GameConfig
+    val gc = GameConfig
 
     private var gridX: Float = 1f
     private var gridY: Float = 1f
 
-    private var timer = 0f
-
     override fun create() {
-        batch = SpriteBatch()
+//        batch = SpriteBatch()
         renderer = ShapeRenderer()
-        player = Texture(Gdx.files.internal("sprites/player.png"))
-        playerShape = TextureRegion(player, 0, 16, 16, 16)
-        val frames = TextureRegion.split(player, 16, 16)
-        val framesWalkRight = Array(frames[1].sliceArray(1..3))
-        playerAnims = listOf(
-                Animation(0.20f, framesWalkRight)
-        )
-
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
 
@@ -45,7 +27,7 @@ class SdRogue : ApplicationAdapter() {
     override fun render() {
         Gdx.gl.glClearColor(0.7f, 0.7f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        timer += Gdx.graphics.deltaTime
+//        batch.begin()
         renderer.begin(ShapeRenderer.ShapeType.Filled)
 
         coloredRegion(gc.inventoryArea, Color.GREEN)
@@ -57,17 +39,13 @@ class SdRogue : ApplicationAdapter() {
                 val tx = tn % this.width
                 val ty = tn / this.width
                 val tile = GameConfig.ScreenRegion(this.offX + tx, this.offY + ty, 1, 1)
-                val col = if ((tx + ty) % 2 == 0) { Color.LIGHT_GRAY } else { Color.WHITE }
+                val col = if ((tx + ty) % 2 == 0) { Color.DARK_GRAY } else { Color.WHITE }
                 coloredRegion(tile, col)
             }
         }
-        renderer.end()
 
-        batch.begin()
-        batch.draw(playerShape, gc.playArea.offX.toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
-        val frame = playerAnims[0].getKeyFrame(timer, true)
-        batch.draw(frame, (gc.playArea.offX + 1).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
-        batch.end()
+//        batch.end()
+        renderer.end()
     }
 
     private fun coloredRegion(reg: GameConfig.ScreenRegion, c: Color) {
@@ -78,7 +56,7 @@ class SdRogue : ApplicationAdapter() {
     }
 
     override fun dispose() {
-        batch.dispose()
+//        batch.dispose()
         renderer.dispose()
     }
 }

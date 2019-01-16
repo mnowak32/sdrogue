@@ -10,6 +10,7 @@ buildscript {
         google()
     }
     dependencies {
+        //noinspection DifferentKotlinGradleVersion
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
 
     }
@@ -48,6 +49,7 @@ project(":desktop") {
         compile "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
         compile "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
         compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+        compile "com.badlogicgames.gdx:gdx-tools:$gdxVersion"
     }
 }
 
