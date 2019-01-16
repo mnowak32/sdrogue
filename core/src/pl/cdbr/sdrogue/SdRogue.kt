@@ -15,7 +15,6 @@ import pl.cdbr.sdrogue.GameConfig.toAbsValue
 class SdRogue : ApplicationAdapter() {
     lateinit var batch: SpriteBatch
     lateinit var renderer: ShapeRenderer
-    lateinit var player: Texture
     lateinit var playerShape: TextureRegion
     lateinit var playerAnims: List<Animation<TextureRegion>>
 
@@ -29,17 +28,18 @@ class SdRogue : ApplicationAdapter() {
     override fun create() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
-        player = Texture(Gdx.files.internal("sprites/player.png"))
-        playerShape = TextureRegion(player, 0, 16, 16, 16)
-        val frames = TextureRegion.split(player, 16, 16)
-        val framesWalkRight = Array(frames[1].sliceArray(1..3))
+        val player = Texture(Gdx.files.internal("sprites/player.png"))
+        playerShape = TextureRegion(player, 0, 0, 16, 16)
+        val allFrames = TextureRegion(player)
+        val frames = allFrames.split(16, 16)
+
         playerAnims = listOf(
-                Animation(0.20f, framesWalkRight)
+                Animation(0.20f, Array(frames[1].sliceArray(1..3))),
+                Animation(0.15f, Array(frames[2].sliceArray(1..3)))
         )
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
-
     }
 
     override fun render() {
@@ -65,8 +65,10 @@ class SdRogue : ApplicationAdapter() {
 
         batch.begin()
         batch.draw(playerShape, gc.playArea.offX.toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
-        val frame = playerAnims[0].getKeyFrame(timer, true)
-        batch.draw(frame, (gc.playArea.offX + 1).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
+        val frame1 = playerAnims[0].getKeyFrame(timer, true)
+        batch.draw(frame1, (gc.playArea.offX + 1).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
+        val frame2 = playerAnims[1].getKeyFrame(timer, true)
+        batch.draw(frame2, (gc.playArea.offX + 2).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
         batch.end()
     }
 
