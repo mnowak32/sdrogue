@@ -24,18 +24,22 @@ class SdRogue : ApplicationAdapter() {
     private var gridY: Float = 1f
 
     private var timer = 0f
+    private var lastStepTimer = timer
+    private var xPos = 0
+    private var xStep = 0f
+    private var moving = false
 
     override fun create() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
         val player = Texture(Gdx.files.internal("sprites/player.png"))
-        playerShape = TextureRegion(player, 0, 0, 16, 16)
+        playerShape = TextureRegion(player, 0, 16, 16, 16)
         val allFrames = TextureRegion(player)
         val frames = allFrames.split(16, 16)
 
         playerAnims = listOf(
-                Animation(0.20f, Array(frames[1].sliceArray(1..3))),
-                Animation(0.15f, Array(frames[2].sliceArray(1..3)))
+                Animation(gc.playerAnimFrameTime, Array(frames[1].sliceArray(1..3))),
+                Animation(gc.playerAnimFrameTime, Array(frames[2].sliceArray(1..3)))
         )
 
         gridX = Gdx.graphics.width / 32f
@@ -64,11 +68,27 @@ class SdRogue : ApplicationAdapter() {
         renderer.end()
 
         batch.begin()
-        batch.draw(playerShape, gc.playArea.offX.toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
-        val frame1 = playerAnims[0].getKeyFrame(timer, true)
-        batch.draw(frame1, (gc.playArea.offX + 1).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
-        val frame2 = playerAnims[1].getKeyFrame(timer, true)
-        batch.draw(frame2, (gc.playArea.offX + 2).toAbsValue(gridX), gc.playArea.offY.toAbsValue(gridY), gridX, gridY)
+        if (!moving && timer - lastStepTimer > 1f) {
+            moving = true
+            lastStepTimer = timer
+        }
+        val frame = if (moving) {
+            val moveTimer = timer - lastStepTimer
+            xStep = (moveTimer / gc.playerMoveTime) //* stepLength == 1
+            if (xStep >= 1f) {
+                moving = false
+                lastStepTimer = timer
+                xStep = 0f
+                xPos += 1
+                if (xPos > 23) { xPos = 0 }
+            }
+            playerAnims[0].getKeyFrame(moveTimer, true)
+        } else { playerShape }
+        batch.draw(
+                frame,
+                (gc.playArea.offX + xPos).toAbsValue(gridX) + (xStep * gridX),
+                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
+        )
         batch.end()
     }
 
