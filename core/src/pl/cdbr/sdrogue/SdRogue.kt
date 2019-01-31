@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.utils.Array
+import com.badlogic.gdx.utils.Array as GdxArray
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
 
 class SdRogue : ApplicationAdapter() {
@@ -38,8 +38,8 @@ class SdRogue : ApplicationAdapter() {
         val frames = allFrames.split(16, 16)
 
         playerAnims = listOf(
-                Animation(gc.playerAnimFrameTime, Array(frames[1].sliceArray(1..3))),
-                Animation(gc.playerAnimFrameTime, Array(frames[2].sliceArray(1..3)))
+                Animation(gc.playerAnimFrameTime, GdxArray(frames[1].sliceArray(1..3))),
+                Animation(gc.playerAnimFrameTime, GdxArray(frames[2].sliceArray(1..3)))
         )
 
         gridX = Gdx.graphics.width / 32f
