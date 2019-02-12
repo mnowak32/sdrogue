@@ -11,6 +11,9 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.Array as GdxArray
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
+import pl.cdbr.sdrogue.game.Engine
+import pl.cdbr.sdrogue.game.KbdHandler
+import pl.cdbr.sdrogue.game.State
 
 class SdRogue : ApplicationAdapter() {
     lateinit var batch: SpriteBatch
@@ -19,6 +22,8 @@ class SdRogue : ApplicationAdapter() {
     lateinit var playerAnims: List<Animation<TextureRegion>>
 
     private val gc = GameConfig
+    private val st = State()
+    private val eng = Engine(st, gc)
 
     private var gridX: Float = 1f
     private var gridY: Float = 1f
@@ -44,9 +49,13 @@ class SdRogue : ApplicationAdapter() {
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
+
+        Gdx.input.inputProcessor = KbdHandler(st)
     }
 
     override fun render() {
+        eng.tick()
+
         Gdx.gl.glClearColor(0.7f, 0.7f, 0f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         timer += Gdx.graphics.deltaTime
@@ -68,27 +77,32 @@ class SdRogue : ApplicationAdapter() {
         renderer.end()
 
         batch.begin()
-        if (!moving && timer - lastStepTimer > 1f) {
-            moving = true
-            lastStepTimer = timer
-        }
-        val frame = if (moving) {
-            val moveTimer = timer - lastStepTimer
-            xStep = (moveTimer / gc.playerMoveTime) //* stepLength == 1
-            if (xStep >= 1f) {
-                moving = false
-                lastStepTimer = timer
-                xStep = 0f
-                xPos += 1
-                if (xPos > 23) { xPos = 0 }
-            }
-            playerAnims[0].getKeyFrame(moveTimer, true)
-        } else { playerShape }
-        batch.draw(
-                frame,
-                (gc.playArea.offX + xPos).toAbsValue(gridX) + (xStep * gridX),
-                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
-        )
+//        if (!moving && timer - lastStepTimer > 1f) {
+//            moving = true
+//            lastStepTimer = timer
+//        }
+//        val frame = if (moving) {
+//            val moveTimer = timer - lastStepTimer
+//            xStep = (moveTimer / gc.playerMoveTime) //* stepLength == 1
+//            if (xStep >= 1f) {
+//                moving = false
+//                lastStepTimer = timer
+//                xStep = 0f
+//                xPos += 1
+//                if (xPos > 23) { xPos = 0 }
+//            }
+//            playerAnims[0].getKeyFrame(moveTimer, true)
+//        } else { playerShape }
+//        batch.draw(
+//                frame,
+//                (gc.playArea.offX + xPos).toAbsValue(gridX) + (xStep * gridX),
+//                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
+//        )
+        batch.draw(playerShape,
+                (gc.playArea.offX + st.player.x).toAbsValue(gridX),
+                (gc.playArea.offY + st.player.y).toAbsValue(gridY),
+                gridX, gridY
+            )
         batch.end()
     }
 
