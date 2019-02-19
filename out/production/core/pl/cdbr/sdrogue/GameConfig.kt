@@ -11,6 +11,10 @@ object GameConfig {
     // messages area - screen bottom
     val messageArea: ScreenRegion = ScreenRegion(0, 0, 32, 2)
 
+    //animation parameters
+    val playerAnimFrameTime = 0.06f
+    val playerMoveTime = 0.24f
+
 
     data class ScreenRegion(val offX: Int, val offY: Int, val width: Int, val height: Int) {
 

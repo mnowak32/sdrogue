@@ -9,8 +9,8 @@ object DesktopLauncher {
     @JvmStatic
     fun main(arg: Array<String>) {
         val config = LwjglApplicationConfiguration().apply {
-            width = 800
-            height = 450
+            width = 1024
+            height = 576
             title = "Software Developer Rogue"
             backgroundFPS = 60
             foregroundFPS = 60

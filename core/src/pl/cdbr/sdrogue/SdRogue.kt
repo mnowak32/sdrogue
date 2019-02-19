@@ -38,7 +38,7 @@ class SdRogue : ApplicationAdapter() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
         val player = Texture(Gdx.files.internal("sprites/player.png"))
-        playerShape = TextureRegion(player, 0, 16, 16, 16)
+        playerShape = TextureRegion(player, 0, 0, 16, 16)
         val allFrames = TextureRegion(player)
         val frames = allFrames.split(16, 16)
 

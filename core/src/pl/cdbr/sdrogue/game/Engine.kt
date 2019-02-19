@@ -5,7 +5,7 @@ import pl.cdbr.sdrogue.GameConfig
 
 class Engine(private val st: State, private val gc: GameConfig) {
     fun tick() {
-        if (st.needUpdate()) {
+        if (st.eventWaiting()) {
             val ev = st.event()
             dispatchEvent(ev)
             if (ev.doTurn) {
@@ -50,8 +50,7 @@ class Engine(private val st: State, private val gc: GameConfig) {
             else -> 0
         }
 
-        st.player.x += dX
-        st.player.y += dY
+        st.move(dX, dY)
         st.dirty()
     }
 
