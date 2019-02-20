@@ -1,5 +1,9 @@
 package pl.cdbr.sdrogue
 
+import pl.cdbr.sdrogue.game.map.Level
+import pl.cdbr.sdrogue.game.map.LevelType
+import java.util.*
+
 object GameConfig {
     // dimensions in a grid unit (the whole screen is 32x18 units - 16:9 AR)
     // origin is bottom-left!
@@ -20,4 +24,18 @@ object GameConfig {
 
     }
     fun Int.toAbsValue(gridDim: Float) = this * gridDim
+
+    val levels = listOf(
+            Level(0, LevelType.RANDOM),
+            Level(1, LevelType.RANDOM),
+            Level(2, LevelType.RANDOM),
+            Level(3, LevelType.ARENA),
+            Level(4, LevelType.RANDOM),
+            Level(5, LevelType.RANDOM),
+            Level(6, LevelType.RANDOM),
+            Level(7, LevelType.BOSS)
+    )
+
+    val levelBaseSize = 20
+    val levelScalingFactor = 2
 }
