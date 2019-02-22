@@ -3,10 +3,24 @@ package pl.cdbr.sdrogue.game.map
 import com.badlogic.gdx.graphics.Color
 
 data class GameMap(val sx: Int, val sy: Int, val startX: Int, val startY: Int, val layers: Map<LayerId, MapLayer>) {
-    fun canGoTo(x: Int, y: Int) = (x >= 0 && y >= 0 && x < sx && y < sy)
+    fun canGoTo(x: Int, y: Int): Boolean {
+        return if (x < 0 || y < 0 || x >= sx || y >= sy) {
+            false
+        } else {
+            layers[LayerId.GROUND]?.tileAt(x, y)?.passable ?: false
+        }
+    }
 }
 
-class MapLayer(val sx: Int, val sy: Int, val tiles: List<MapTile>) {
+class MapLayer(private val sx: Int, private val sy: Int, private val tiles: List<MapTile>) {
+    fun tileAt(x: Int, y: Int): MapTile? {
+        return if (x >= sx || y >= sy) {
+            null
+        } else {
+            tiles[y * sx + x]
+        }
+    }
+
     override fun toString(): String {
         return (0 until sy).joinToString("\n") { y ->
             tiles.slice(y * sx until y * sx + sx).joinToString("") { it.glyph }
@@ -19,7 +33,7 @@ enum class LayerId {
 }
 
 enum class MapTile(val glyph: String, val color: Color, val passable: Boolean = true) {
-    GRASS(",", Color.GREEN),
+    GRASS(",", Color.OLIVE),
     WALL("#", Color.DARK_GRAY, false),
     DIRT(".", Color.BROWN),
     FLOOR_STONE(".", Color.LIGHT_GRAY),

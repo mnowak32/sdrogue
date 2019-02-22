@@ -1,7 +1,10 @@
 package pl.cdbr.sdrogue.game
 
+import com.badlogic.gdx.graphics.Color
 import pl.cdbr.sdrogue.GameConfig
+import pl.cdbr.sdrogue.game.map.LayerId
 import pl.cdbr.sdrogue.game.map.Level
+import pl.cdbr.sdrogue.game.map.MapLayer
 import java.util.*
 
 @Suppress("unused")
@@ -62,5 +65,9 @@ class State {
         } else {
             false
         }
+    }
+
+    fun mapColorAt(tx: Int, ty: Int): Color {
+        return map.layers[LayerId.GROUND]?.tileAt(tx, ty)?.color ?: Color.BLACK
     }
 }

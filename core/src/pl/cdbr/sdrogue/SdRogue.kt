@@ -70,7 +70,7 @@ class SdRogue : ApplicationAdapter() {
                 val tx = tn % this.width
                 val ty = tn / this.width
                 val tile = GameConfig.ScreenRegion(this.offX + tx, this.offY + ty, 1, 1)
-                val col = if ((tx + ty) % 2 == 0) { Color.LIGHT_GRAY } else { Color.WHITE }
+                val col = st.mapColorAt(tx, ty)
                 coloredRegion(tile, col)
             }
         }

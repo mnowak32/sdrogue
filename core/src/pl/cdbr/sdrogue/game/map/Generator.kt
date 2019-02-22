@@ -3,27 +3,28 @@ package pl.cdbr.sdrogue.game.map
 import java.util.*
 
 @Suppress("unused")
-class Generator(private val size: Int, private val roomDensity: Int, val passageDensity: Int) {
-    private val mid = size / 2
+class Generator(private val sizeX: Int, private val sizeY: Int, private val roomDensity: Int, val passageDensity: Int) {
+    val startX = sizeX / 2
+    val startY = sizeY / 2
     private val rnd = Random()
 
     enum class Where { IN, WALL, OUT }
 
     fun ground(): MapLayer {
-        println("Generating ground layer with size: $size")
-        val roomCount = ((size / 5) * (size / 5) * roomDensity / 100) * (50 + rnd.nextInt(50)) / 100
+        println("Generating ground layer with size: $sizeX x $sizeY")
+        val roomCount = ((sizeX / 5) * (sizeY / 5) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
         println("Room count is $roomCount")
-        val avgSize = 2 + rnd.nextInt(5)
+        val avgSize = 2 + rnd.nextInt(3)
         println("Average size is $avgSize")
 
         //ensure there's a room at the starting position
-        val rooms = randomRooms(roomCount, avgSize) + randomRoomAt(mid, mid, avgSize)
+        val rooms = randomRooms(roomCount, avgSize) + randomRoomAt(startX, startY, avgSize)
         println("Created ${rooms.size} rooms")
-        val insideOut = Array(size * size) { Where.OUT }
+        val insideOut = Array(sizeX * sizeY) { Where.OUT }
         rooms.forEach { r ->
             for (x in r.xs .. (r.xs + r.x)) {
                 for (y in r.ys .. (r.ys + r.y)) {
-                    val arrPos = y * size + x
+                    val arrPos = y * sizeX + x
                     val currWhere = when {
                         x == r.xs || y == r.ys -> Where.WALL
                         x == (r.xs + r.x) || y == (r.ys + r.y) -> Where.WALL
@@ -36,7 +37,7 @@ class Generator(private val size: Int, private val roomDensity: Int, val passage
             }
         }
 
-        val layer = MapLayer(size, size, insideOut.map {
+        val layer = MapLayer(sizeX, sizeY, insideOut.map {
             when (it) {
                 Where.IN -> MapTile.FLOOR_STONE
                 Where.WALL -> MapTile.WALL
@@ -50,8 +51,8 @@ class Generator(private val size: Int, private val roomDensity: Int, val passage
     private fun randomRooms(c: Int, avgSize: Int) = (1..c).map {
             val xs = avgSize / 2 + (rnd.nextInt(avgSize - 1)) + 1
             val ys = avgSize / 2 + (rnd.nextInt(avgSize - 1)) + 1
-            val x = rnd.nextInt(size - xs)
-            val y = rnd.nextInt(size - ys)
+            val x = rnd.nextInt(sizeX - xs)
+            val y = rnd.nextInt(sizeY - ys)
             Room(x, y, xs, ys)
         }.toList()
 
