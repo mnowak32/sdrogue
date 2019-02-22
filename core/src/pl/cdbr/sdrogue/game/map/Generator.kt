@@ -3,7 +3,7 @@ package pl.cdbr.sdrogue.game.map
 import java.util.*
 
 @Suppress("unused")
-class Generator(private val sizeX: Int, private val sizeY: Int, private val roomDensity: Int, val passageDensity: Int) {
+class Generator(private val sizeX: Int, private val sizeY: Int, private val roomDensity: Int, val roomSize: Int, val passageDensity: Int) {
     val startX = sizeX / 2
     val startY = sizeY / 2
     private val rnd = Random()
@@ -12,9 +12,9 @@ class Generator(private val sizeX: Int, private val sizeY: Int, private val room
 
     fun ground(): MapLayer {
         println("Generating ground layer with size: $sizeX x $sizeY")
-        val roomCount = ((sizeX / 5) * (sizeY / 5) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
+        val roomCount = ((sizeX / 6) * (sizeY / 6) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
         println("Room count is $roomCount")
-        val avgSize = 2 + rnd.nextInt(3)
+        val avgSize = 2 + rnd.nextInt(roomSize)
         println("Average size is $avgSize")
 
         //ensure there's a room at the starting position

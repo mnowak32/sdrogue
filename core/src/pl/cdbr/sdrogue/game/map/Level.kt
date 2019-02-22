@@ -15,8 +15,8 @@ data class Level(val num: Int, val type: LevelType) {
 
     private fun randomMap(): GameMap {
         val mapSizeX = GameConfig.levelBaseSize + num * GameConfig.levelScalingFactor
-        val mapSizeY = mapSizeX * 4 / 5
-        val gen = Generator(mapSizeX, mapSizeY, 100, 100)
+        val mapSizeY = mapSizeX * 2 / 3
+        val gen = Generator(mapSizeX, mapSizeY, 50, 1, 100)
         // starting position always in the middle of the generated map (for now)
         return GameMap(mapSizeX, mapSizeY, gen.startX, gen.startY, mapOf(
                 LayerId.GROUND to gen.ground()
