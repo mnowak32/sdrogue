@@ -64,13 +64,15 @@ class SdRogue : ApplicationAdapter() {
         coloredRegion(gc.inventoryArea, Color.GREEN)
         coloredRegion(gc.messageArea, Color.BROWN)
 
+        val (viewX, viewY) = st.mapOffset()
+
         gc.playArea.apply {
             val gridCount = this.width * this.height
             for (tn in 0..gridCount) {
                 val tx = tn % this.width
                 val ty = tn / this.width
                 val tile = GameConfig.ScreenRegion(this.offX + tx, this.offY + ty, 1, 1)
-                val col = st.mapColorAt(tx, ty)
+                val col = st.mapColorAt(tx + viewX, ty + viewY)
                 coloredRegion(tile, col)
             }
         }
@@ -99,8 +101,8 @@ class SdRogue : ApplicationAdapter() {
 //                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
 //        )
         batch.draw(playerShape,
-                (gc.playArea.offX + st.player.x).toAbsValue(gridX),
-                (gc.playArea.offY + st.player.y).toAbsValue(gridY),
+                (gc.playArea.offX + st.player.x - viewX).toAbsValue(gridX),
+                (gc.playArea.offY + st.player.y - viewY).toAbsValue(gridY),
                 gridX, gridY
             )
         batch.end()

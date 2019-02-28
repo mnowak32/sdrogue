@@ -3,7 +3,13 @@ package pl.cdbr.sdrogue.game.map
 import java.util.*
 
 @Suppress("unused")
-class Generator(private val sizeX: Int, private val sizeY: Int, private val roomDensity: Int, val roomSize: Int, val passageDensity: Int) {
+class Generator(
+        private val sizeX: Int,
+        private val sizeY: Int,
+        private val roomDensity: Int,
+        private val roomSize: Int,
+        private val passageDensity: Int
+) {
     val startX = sizeX / 2
     val startY = sizeY / 2
     private val rnd = Random()
@@ -14,19 +20,17 @@ class Generator(private val sizeX: Int, private val sizeY: Int, private val room
         println("Generating ground layer with size: $sizeX x $sizeY")
         val roomCount = ((sizeX / 6) * (sizeY / 6) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
         println("Room count is $roomCount")
-        val avgSize = 2 + rnd.nextInt(roomSize)
-        println("Average size is $avgSize")
 
         //ensure there's a room at the starting position
-        val rooms = randomRooms(roomCount, avgSize) + randomRoomAt(startX, startY, avgSize)
+        val rooms = randomRooms(roomCount, roomSize) + randomRoomAt(startX, startY, roomSize)
         println("Created ${rooms.size} rooms")
         val insideOut = Array(sizeX * sizeY) { Where.OUT }
         rooms.forEach { r ->
-            for (x in r.xs .. (r.xs + r.x)) {
-                for (y in r.ys .. (r.ys + r.y)) {
+            for (x in r.x .. (r.xs + r.x)) {
+                for (y in r.y .. (r.ys + r.y)) {
                     val arrPos = y * sizeX + x
                     val currWhere = when {
-                        x == r.xs || y == r.ys -> Where.WALL
+                        x == r.x || y == r.y -> Where.WALL
                         x == (r.xs + r.x) || y == (r.ys + r.y) -> Where.WALL
                         else -> Where.IN
                     }
@@ -57,8 +61,8 @@ class Generator(private val sizeX: Int, private val sizeY: Int, private val room
         }.toList()
 
     private fun randomRoomAt(x: Int, y: Int, avgSize: Int): Room {
-        val xs = avgSize / 2 + (rnd.nextInt(avgSize - 1))
-        val ys = avgSize / 2 + (rnd.nextInt(avgSize - 1))
+        val xs = avgSize / 2 + (rnd.nextInt(avgSize - 1)) + 1
+        val ys = avgSize / 2 + (rnd.nextInt(avgSize - 1)) + 1
         val nx = x - xs / 2
         val ny = y - ys / 2
         return Room(nx, ny, xs, ys)

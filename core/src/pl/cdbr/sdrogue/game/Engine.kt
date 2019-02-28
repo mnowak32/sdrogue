@@ -29,9 +29,17 @@ class Engine(private val st: State, private val gc: GameConfig) {
             InputEvent.MOVE_NW
                     -> doMove(ev)
 
+            InputEvent.CLIMB_DOWN,
+            InputEvent.CLIMB_UP
+                    -> doClimb(ev)
+
             InputEvent.CANCEL
                     -> doCancel()
         }
+    }
+
+    private fun doClimb(ev: InputEvent) {
+        st.changeLevel(ev == InputEvent.CLIMB_DOWN)
     }
 
     private fun doCancel() {

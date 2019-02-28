@@ -12,6 +12,9 @@ enum class InputEvent(val doTurn: Boolean = true) {
     //no movement (pass a turn)
     MOVE_NONE,
 
+    //moving between levels
+    CLIMB_UP, CLIMB_DOWN,
+
     //use items, weapon, magic
     USE1, USE2, FIRE, CAST, RELOAD,
 

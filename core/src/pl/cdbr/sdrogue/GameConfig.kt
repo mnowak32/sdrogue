@@ -26,16 +26,20 @@ object GameConfig {
     fun Int.toAbsValue(gridDim: Float) = this * gridDim
 
     val levels = listOf(
-//            Level(0, LevelType.RANDOM),
-//            Level(1, LevelType.RANDOM),
-//            Level(2, LevelType.RANDOM),
-//            Level(3, LevelType.ARENA),
+            Level(0, LevelType.RANDOM),
+            Level(1, LevelType.RANDOM),
+            Level(2, LevelType.RANDOM),
+            Level(3, LevelType.ARENA),
             Level(4, LevelType.RANDOM),
             Level(5, LevelType.RANDOM),
             Level(6, LevelType.RANDOM),
-            Level(7, LevelType.BOSS)
+            Level(7, LevelType.ARENA),
+            Level(8, LevelType.RANDOM),
+            Level(9, LevelType.RANDOM),
+            Level(10, LevelType.RANDOM),
+            Level(11, LevelType.BOSS)
     )
 
     val levelBaseSize = 24
-    val levelScalingFactor = 2
+    val levelScalingFactor = 4
 }

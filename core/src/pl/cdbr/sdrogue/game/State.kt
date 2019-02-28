@@ -53,9 +53,10 @@ class State {
         isDirty = false
     }
 
-    fun advanceToNextLevel(): Boolean {
+    fun changeLevel(down: Boolean = false): Boolean {
         val currLevel = level.num
-        val nextLevel = GameConfig.levels.find { it.num == (currLevel + 1) }
+        val nextLevel = GameConfig.levels.find { it.num == if (down) (currLevel - 1) else (currLevel + 1) }
+        println("new Level is $nextLevel")
         return if (nextLevel != null) {
             level = nextLevel
             map = level.generateMap()
@@ -69,5 +70,13 @@ class State {
 
     fun mapColorAt(tx: Int, ty: Int): Color {
         return map.layers[LayerId.GROUND]?.tileAt(tx, ty)?.color ?: Color.BLACK
+    }
+
+    fun mapOffset(): Pair<Int, Int> {
+        val maxOffX = map.sx - GameConfig.playArea.width
+        val maxOffY = map.sy - GameConfig.playArea.height
+        val offX = player.x - (GameConfig.playArea.width / 2)
+        val offY = player.y - (GameConfig.playArea.height / 2)
+        return offX.coerceIn(0, maxOffX) to offY.coerceIn(0, maxOffY)
     }
 }

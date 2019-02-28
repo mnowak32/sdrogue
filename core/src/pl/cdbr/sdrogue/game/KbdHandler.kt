@@ -15,7 +15,10 @@ class KbdHandler(val state: State) : InputProcessor {
             Keys.NUMPAD_9 -> InputEvent.MOVE_NE
             Keys.NUMPAD_3 -> InputEvent.MOVE_SE
             Keys.NUMPAD_1 -> InputEvent.MOVE_SW
-            Keys.NUMPAD_5, Keys.PERIOD -> InputEvent.MOVE_NONE
+//            Keys.NUMPAD_5, Keys.PERIOD -> InputEvent.MOVE_NONE
+
+            Keys.COMMA -> InputEvent.CLIMB_DOWN
+            Keys.PERIOD -> InputEvent.CLIMB_UP
 
             Keys.ESCAPE -> InputEvent.CANCEL
             else -> null
