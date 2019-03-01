@@ -14,42 +14,80 @@ class Generator(
     val startY = sizeY / 2
     private val rnd = Random()
 
-    enum class Where { IN, WALL, OUT }
+    enum class Where { IN, WALL, OUT, ACC }
 
     fun ground(): MapLayer {
         println("Generating ground layer with size: $sizeX x $sizeY")
         val roomCount = ((sizeX / 6) * (sizeY / 6) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
         println("Room count is $roomCount")
 
-        //ensure there's a room at the starting position
-        val rooms = randomRooms(roomCount, roomSize) + randomRoomAt(startX, startY, roomSize)
-        println("Created ${rooms.size} rooms")
-        val insideOut = Array(sizeX * sizeY) { Where.OUT }
-        rooms.forEach { r ->
-            for (x in r.x .. (r.xs + r.x)) {
-                for (y in r.y .. (r.ys + r.y)) {
-                    val arrPos = y * sizeX + x
-                    val currWhere = when {
-                        x == r.x || y == r.y -> Where.WALL
-                        x == (r.xs + r.x) || y == (r.ys + r.y) -> Where.WALL
-                        else -> Where.IN
-                    }
-                    if (currWhere < insideOut[arrPos]) {
-                        insideOut[arrPos] = currWhere
-                    }
-                }
-            }
+        val floorLayout = createRoomsLayout(roomCount)
+
+        //ensure every floor square is accessible
+        //start in the middle (player starting position)
+        floorLayout[startY * sizeX + startX] = Where.ACC
+        //mark all accessible floor squares
+        expandAccessible(floorLayout)
+        if (floorLayout.contains(Where.IN)) { //there still are inaccessible rooms
+            println("Map STILL contains INACCESSIBLE locations!!!")
         }
 
-        val layer = MapLayer(sizeX, sizeY, insideOut.map {
+        val layer = MapLayer(sizeX, sizeY, floorLayout.map {
             when (it) {
-                Where.IN -> MapTile.FLOOR_STONE
+                Where.IN -> MapTile.DIRT
+                Where.ACC -> MapTile.FLOOR_STONE
                 Where.WALL -> MapTile.WALL
                 else -> MapTile.GRASS
             }
         })
         println(layer)
         return layer
+    }
+
+    private fun createRoomsLayout(roomCount: Int): Array<Where> {
+        val layout = Array(sizeX * sizeY) { Where.OUT }
+        //some random rooms + ensure there's a room at the starting position
+        val rooms = randomRooms(roomCount, roomSize) + randomRoomAt(startX, startY, roomSize)
+        println("Created ${rooms.size} rooms")
+        rooms.forEach { r ->
+            for (x in 0..r.xs) {
+                for (y in 0..r.ys) {
+                    val arrPos = (y + r.y) * sizeX + x + r.x
+                    val currWhere = when {
+                        x == 0 || y == 0 -> Where.WALL
+                        x == r.xs || y == r.ys -> Where.WALL
+                        else -> Where.IN
+                    }
+                    if (currWhere < layout[arrPos]) {
+                        layout[arrPos] = currWhere
+                    }
+                }
+            }
+        }
+        return layout
+    }
+
+    private fun expandAccessible(io: Array<Where>): Boolean {
+        var expanded = true
+        var updatedCells = 0
+        while (expanded) {
+            expanded = false
+            for (f in io.indices) {
+                val x = f % sizeX
+                val y = f / sizeX
+                if (io[f] == Where.IN && (
+                    (y > 0 && io[f - sizeX] == Where.ACC) ||
+                    (y < (sizeY - 1) && io[f + sizeX] == Where.ACC) ||
+                    (x > 0 && io[f - 1] == Where.ACC) ||
+                    (x < (sizeX - 1) && io[f + 1] == Where.ACC)
+                )) {
+                    io[f] = Where.ACC
+                    expanded = true
+                    updatedCells++
+                }
+            }
+        }
+        return updatedCells > 0
     }
 
     private fun randomRooms(c: Int, avgSize: Int) = (1..c).map {

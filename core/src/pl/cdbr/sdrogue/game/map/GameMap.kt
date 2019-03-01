@@ -22,8 +22,8 @@ class MapLayer(private val sx: Int, private val sy: Int, private val tiles: List
     }
 
     override fun toString(): String {
-        return (0 until sy).joinToString("\n") { y ->
-            tiles.slice(y * sx until y * sx + sx).joinToString("") { it.glyph }
+        return (sy - 1 downTo 0).joinToString("\n") { y ->
+            tiles.slice(y * sx until y * sx + sx).joinToString("")
         }
     }
 }
@@ -35,7 +35,7 @@ enum class LayerId {
 enum class MapTile(val glyph: String, val color: Color, val passable: Boolean = true) {
     GRASS(",", Color.OLIVE),
     WALL("#", Color.DARK_GRAY, false),
-    DIRT(".", Color.BROWN),
+    DIRT("^", Color.BROWN),
     FLOOR_STONE(".", Color.LIGHT_GRAY),
     DOOR_C("+", Color.ROYAL, false),
     DOOR_O("'", Color.ROYAL),
@@ -47,5 +47,8 @@ enum class MapTile(val glyph: String, val color: Color, val passable: Boolean = 
     SWORD("\\", Color.BLUE),
     BOW("}", Color.CHARTREUSE),
     STAFF("/", Color.YELLOW),
+    ;
+
+    override fun toString() = glyph
 }
 

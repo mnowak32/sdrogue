@@ -61,7 +61,7 @@ class SdRogue : ApplicationAdapter() {
         timer += Gdx.graphics.deltaTime
         renderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        coloredRegion(gc.inventoryArea, Color.GREEN)
+        coloredRegion(gc.inventoryArea, Color.BLACK)
         coloredRegion(gc.messageArea, Color.BROWN)
 
         val (viewX, viewY) = st.mapOffset()
