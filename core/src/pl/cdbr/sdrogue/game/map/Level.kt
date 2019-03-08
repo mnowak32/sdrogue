@@ -4,19 +4,22 @@ import pl.cdbr.sdrogue.GameConfig
 
 data class Level(val num: Int, val type: LevelType) {
     fun generateMap() = when (type) {
-        LevelType.RANDOM -> randomMap()
+        LevelType.DUNGEON -> dungeonMap()
         LevelType.ARENA -> arenaMap()
         LevelType.BOSS -> bossMap()
+        LevelType.CAVERN -> cavernMap()
     }
 
-    private fun bossMap() = randomMap()
+    private fun bossMap() = dungeonMap()
 
-    private fun arenaMap() = randomMap()
+    private fun arenaMap() = parametrizedMap(1, (GameConfig.levelBaseSize + num * GameConfig.levelScalingFactor) / 2)
+    private fun dungeonMap() = parametrizedMap(80, 6)
+    private fun cavernMap() = parametrizedMap(50, 4)
 
-    private fun randomMap(): GameMap {
+    private fun parametrizedMap(roomDens: Int, roomSize: Int): GameMap {
         val mapSizeX = GameConfig.levelBaseSize + num * GameConfig.levelScalingFactor
         val mapSizeY = mapSizeX * 2 / 3
-        val gen = Generator(mapSizeX, mapSizeY, 80, 6, 100)
+        val gen = Generator(mapSizeX, mapSizeY, roomDens, roomSize)
         // starting position always in the middle of the generated map (for now)
         return GameMap(mapSizeX, mapSizeY, gen.startX, gen.startY, mapOf(
                 LayerId.GROUND to gen.ground()
@@ -25,5 +28,5 @@ data class Level(val num: Int, val type: LevelType) {
 }
 
 enum class LevelType {
-    RANDOM, ARENA, BOSS
+    DUNGEON, ARENA, BOSS, CAVERN
 }

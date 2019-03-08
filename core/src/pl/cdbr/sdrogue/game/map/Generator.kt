@@ -8,8 +8,7 @@ class Generator(
         private val sizeX: Int,
         private val sizeY: Int,
         private val roomDensity: Int,
-        private val roomSize: Int,
-        private val passageDensity: Int
+        private val roomSize: Int
 ) {
     val startX = sizeX / 2
     val startY = sizeY / 2
@@ -29,6 +28,8 @@ class Generator(
         floorLayout[startY * sizeX + startX] = Where.ACC
         //mark all accessible floor squares
         expandAccessible(floorLayout, Where.IN, Where.ACC)
+
+        //find inaccesible tiles and connect them to the rest
         var inAccessTileIdx = floorLayout.indexOfFirst { it == Where.IN }
         while (inAccessTileIdx > -1) { //there still are inaccessible rooms
             println("Map STILL contains INACCESSIBLE locations!!! (idx: $inAccessTileIdx)")
@@ -58,7 +59,6 @@ class Generator(
                 Where.IN -> MapTile.DIRT
                 Where.ACC -> MapTile.FLOOR_STONE
                 Where.WALL -> MapTile.WALL
-                Where.WORK -> MapTile.PLAYER
                 Where.MARK -> MapTile.DOOR_O
                 else -> MapTile.GRASS
             }
@@ -78,15 +78,15 @@ class Generator(
             val dir = rnd.nextBoolean()
             if (dir) {
                 if (x1 != x2) { //move in X direction
-                    x1 += if (x1 < x2) 1 else -1
+                    x1 -= x1.compareTo(x2)
                 } else { //move in Y
-                    y1 += if (y1 < y2) 1 else -1
+                    y1 -= y1.compareTo(y2)
                 }
             } else {
                 if (y1 != y2) { //move in Y direction
-                    y1 += if (y1 < y2) 1 else -1
+                    y1 -= y1.compareTo(y2)
                 } else { //move in X
-                    x1 += if (x1 < x2) 1 else -1
+                    x1 -= x1.compareTo(x2)
                 }
             }
             //don't add the final tile to the path (it's already WORKed at)
@@ -151,7 +151,7 @@ class Generator(
                         x == r.xs || y == r.ys -> Where.WALL
                         else -> Where.IN
                     }
-                    if (currWhere < layout[arrPos]) {
+                    if (arrPos < layout.size && currWhere < layout[arrPos]) {
                         layout[arrPos] = currWhere
                     }
                 }

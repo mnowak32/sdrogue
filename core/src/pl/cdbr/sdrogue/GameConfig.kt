@@ -2,7 +2,6 @@ package pl.cdbr.sdrogue
 
 import pl.cdbr.sdrogue.game.map.Level
 import pl.cdbr.sdrogue.game.map.LevelType
-import java.util.*
 
 object GameConfig {
     // dimensions in a grid unit (the whole screen is 32x18 units - 16:9 AR)
@@ -26,21 +25,21 @@ object GameConfig {
     fun Int.toAbsValue(gridDim: Float) = this * gridDim
 
     val levels = listOf(
-            Level(0, LevelType.RANDOM),
-            Level(1, LevelType.RANDOM),
-            Level(2, LevelType.RANDOM),
+            Level(0, LevelType.DUNGEON),
+            Level(1, LevelType.CAVERN),
+            Level(2, LevelType.DUNGEON),
             Level(3, LevelType.ARENA),
-            Level(4, LevelType.RANDOM),
-            Level(5, LevelType.RANDOM),
-            Level(6, LevelType.RANDOM),
+            Level(4, LevelType.DUNGEON),
+            Level(5, LevelType.CAVERN),
+            Level(6, LevelType.CAVERN),
             Level(7, LevelType.ARENA),
-            Level(8, LevelType.RANDOM),
-            Level(9, LevelType.RANDOM),
-            Level(10, LevelType.RANDOM),
+            Level(8, LevelType.DUNGEON),
+            Level(9, LevelType.CAVERN),
+            Level(10, LevelType.DUNGEON),
             Level(11, LevelType.ARENA),
-            Level(12, LevelType.RANDOM),
-            Level(13, LevelType.RANDOM),
-            Level(14, LevelType.RANDOM),
+            Level(12, LevelType.CAVERN),
+            Level(13, LevelType.DUNGEON),
+            Level(14, LevelType.CAVERN),
             Level(15, LevelType.BOSS)
     )
 
