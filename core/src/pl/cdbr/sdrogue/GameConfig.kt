@@ -37,7 +37,11 @@ object GameConfig {
             Level(8, LevelType.RANDOM),
             Level(9, LevelType.RANDOM),
             Level(10, LevelType.RANDOM),
-            Level(11, LevelType.BOSS)
+            Level(11, LevelType.ARENA),
+            Level(12, LevelType.RANDOM),
+            Level(13, LevelType.RANDOM),
+            Level(14, LevelType.RANDOM),
+            Level(15, LevelType.BOSS)
     )
 
     val levelBaseSize = 24

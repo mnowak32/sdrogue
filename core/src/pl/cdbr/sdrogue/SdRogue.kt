@@ -4,22 +4,19 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
-import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import com.badlogic.gdx.utils.Array as GdxArray
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
 import pl.cdbr.sdrogue.game.Engine
 import pl.cdbr.sdrogue.game.KbdHandler
 import pl.cdbr.sdrogue.game.State
+import pl.cdbr.sdrogue.game.graphics.Shapes
+import com.badlogic.gdx.utils.Array as GdxArray
 
 class SdRogue : ApplicationAdapter() {
-    lateinit var batch: SpriteBatch
-    lateinit var renderer: ShapeRenderer
-    lateinit var playerShape: TextureRegion
-    lateinit var playerAnims: List<Animation<TextureRegion>>
+    private lateinit var batch: SpriteBatch
+    private lateinit var renderer: ShapeRenderer
+    private lateinit var shapes: Shapes
 
     private val gc = GameConfig
     private val st = State()
@@ -29,28 +26,22 @@ class SdRogue : ApplicationAdapter() {
     private var gridY: Float = 1f
 
     private var timer = 0f
-    private var lastStepTimer = timer
-    private var xPos = 0
-    private var xStep = 0f
-    private var moving = false
+//    private var lastStepTimer = timer
+//    private var xPos = 0
+//    private var xStep = 0f
+//    private var moving = false
+
+    private var kbd = KbdHandler(st)
 
     override fun create() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
-        val player = Texture(Gdx.files.internal("sprites/player.png"))
-        playerShape = TextureRegion(player, 0, 0, 16, 16)
-        val allFrames = TextureRegion(player)
-        val frames = allFrames.split(16, 16)
-
-        playerAnims = listOf(
-                Animation(gc.playerAnimFrameTime, GdxArray(frames[1].sliceArray(1..3))),
-                Animation(gc.playerAnimFrameTime, GdxArray(frames[2].sliceArray(1..3)))
-        )
+        shapes = Shapes(gc)
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
 
-        Gdx.input.inputProcessor = KbdHandler(st)
+        Gdx.input.inputProcessor = kbd
     }
 
     override fun render() {
@@ -100,12 +91,34 @@ class SdRogue : ApplicationAdapter() {
 //                (gc.playArea.offX + xPos).toAbsValue(gridX) + (xStep * gridX),
 //                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
 //        )
-        batch.draw(playerShape,
+        batch.draw(shapes.player,
                 (gc.playArea.offX + st.player.x - viewX).toAbsValue(gridX),
                 (gc.playArea.offY + st.player.y - viewY).toAbsValue(gridY),
                 gridX, gridY
             )
+
+        drawKeyState(batch)
+
         batch.end()
+    }
+
+    private fun drawKeyState(batch: SpriteBatch) {
+        if (kbd.shiftPressed) batch.draw(shapes.keys[Shapes.Key.SHIFT],
+                (gc.messageArea.offX + 0).toAbsValue(gridX),
+                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                gridX, gridY
+        )
+        if (kbd.ctrlPressed) batch.draw(shapes.keys[Shapes.Key.CTRL],
+                (gc.messageArea.offX + 1).toAbsValue(gridX),
+                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                gridX, gridY
+        )
+        if (kbd.altPressed) batch.draw(shapes.keys[Shapes.Key.ALT],
+                (gc.messageArea.offX + 2).toAbsValue(gridX),
+                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                gridX, gridY
+        )
+
     }
 
     private fun coloredRegion(reg: GameConfig.ScreenRegion, c: Color) {

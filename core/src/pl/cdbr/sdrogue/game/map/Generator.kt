@@ -1,6 +1,7 @@
 package pl.cdbr.sdrogue.game.map
 
 import java.util.*
+import kotlin.math.roundToInt
 
 @Suppress("unused")
 class Generator(
@@ -14,7 +15,7 @@ class Generator(
     val startY = sizeY / 2
     private val rnd = Random()
 
-    enum class Where { IN, WALL, OUT, ACC }
+    enum class Where { IN, WALL, OUT, ACC, WORK, MARK }
 
     fun ground(): MapLayer {
         println("Generating ground layer with size: $sizeX x $sizeY")
@@ -27,9 +28,29 @@ class Generator(
         //start in the middle (player starting position)
         floorLayout[startY * sizeX + startX] = Where.ACC
         //mark all accessible floor squares
-        expandAccessible(floorLayout)
-        if (floorLayout.contains(Where.IN)) { //there still are inaccessible rooms
-            println("Map STILL contains INACCESSIBLE locations!!!")
+        expandAccessible(floorLayout, Where.IN, Where.ACC)
+        var inAccessTileIdx = floorLayout.indexOfFirst { it == Where.IN }
+        while (inAccessTileIdx > -1) { //there still are inaccessible rooms
+            println("Map STILL contains INACCESSIBLE locations!!! (idx: $inAccessTileIdx)")
+            //mark "inAccessTile" as WORKing area
+            floorLayout[inAccessTileIdx] = Where.WORK
+            //mark tiles connected to "inAccessTile" as a working region
+            expandAccessible(floorLayout, Where.IN, Where.WORK)
+            //find the geometric center of the WORK area
+            val centerCoords = findCenterOf(floorLayout, Where.WORK)
+            //find an accessible tile that is the nearest to the center
+            val nearestAcc = findNearestTo(floorLayout, centerCoords, Where.ACC)
+            if (nearestAcc != null) {
+                //now pick a WORK tile nearest to the "nearestAcc"
+                val nearestWork = findNearestTo(floorLayout, nearestAcc, Where.WORK)
+                if (nearestWork != null) {
+                    corridorBetween(floorLayout, nearestAcc, nearestWork)
+                    //now, the whole "WORK" area is accesible, so mark it out as such...
+                    expandAccessible(floorLayout, Where.WORK, Where.ACC)
+                } //else shouldn't happen EVER - we already worked it out from the oter side!
+            }
+            //update the inaccesibe room indicator
+            inAccessTileIdx = floorLayout.indexOfFirst { it == Where.IN }
         }
 
         val layer = MapLayer(sizeX, sizeY, floorLayout.map {
@@ -37,11 +58,83 @@ class Generator(
                 Where.IN -> MapTile.DIRT
                 Where.ACC -> MapTile.FLOOR_STONE
                 Where.WALL -> MapTile.WALL
+                Where.WORK -> MapTile.PLAYER
+                Where.MARK -> MapTile.DOOR_O
                 else -> MapTile.GRASS
             }
         })
         println(layer)
         return layer
+    }
+
+    private fun corridorBetween(fl: Array<Where>, t1: Pair<Int, Int>, t2: Pair<Int, Int>) {
+        var (x1, y1) = t1
+        val (x2, y2) = t2
+
+        //find and remember the path between t1 and t2
+        val path = mutableListOf<Pair<Int, Int>>()
+        while (x1 != x2 || y1 != y2) {
+            //randomize x/y preference (otherwise the corridor has only one turn...)
+            val dir = rnd.nextBoolean()
+            if (dir) {
+                if (x1 != x2) { //move in X direction
+                    x1 += if (x1 < x2) 1 else -1
+                } else { //move in Y
+                    y1 += if (y1 < y2) 1 else -1
+                }
+            } else {
+                if (y1 != y2) { //move in Y direction
+                    y1 += if (y1 < y2) 1 else -1
+                } else { //move in X
+                    x1 += if (x1 < x2) 1 else -1
+                }
+            }
+            //don't add the final tile to the path (it's already WORKed at)
+            if ((x1 != x2 || y1 != y2)) path += (x1 to y1)
+        }
+        //now draw walls around the path...
+        path.forEach { p ->
+            p.around().forEach { w ->
+                //.. but only on the "outside" tiles
+                if (fl[w.toIndex()] == Where.OUT) { fl[w.toIndex()] = Where.WALL }
+            }
+        }
+        // finally, draw the path between walls
+        path.forEach { p -> fl[p.toIndex()] = Where.WORK }
+    }
+
+    private fun Pair<Int, Int>.around() =
+        aroundCoords.map { this.first + it.first to this.second + it.second }
+                .filter {
+                    it.first in 0..(sizeX - 1) &&
+                    it.second in 0..(sizeY - 1)
+                }
+
+    private fun Int.toCoords() = this % sizeX to this / sizeX
+    private fun Pair<Int, Int>.toIndex() = this.first + this.second * sizeX
+    private fun Pair<Int, Int>.distanceTo(to: Pair<Int, Int>) =
+            Math.hypot(to.first.toDouble() - this.first, to.second.toDouble() - this.second).roundToInt()
+
+    private fun findNearestTo(fl: Array<Where>, cc: Pair<Int, Int>, what: Where): Pair<Int, Int>? {
+        val nearest = fl
+                // find distances between cc and all tiles of type "what"
+                .mapIndexedNotNull { i, w -> if (w == what) {
+                    val iCoords = i.toCoords()
+                    iCoords to (cc.distanceTo(iCoords))
+                } else { null } }
+                // then get the lowest value
+                .minBy { it.second }
+        //possibly null, because things...
+        return nearest?.first
+    }
+
+    private fun findCenterOf(fl: Array<Where>, what: Where): Pair<Int, Int> {
+        //find all indexes in the array that are "what"
+        val idxs = fl.mapIndexedNotNull { i, w -> if (w == what) { i } else { null } }
+        // calculate averaged coordinates (middle) of the whole area
+        val avgX = idxs.map { it % sizeX }.average().roundToInt()
+        val avgY = idxs.map { it / sizeX }.average().roundToInt()
+        return avgX to avgY
     }
 
     private fun createRoomsLayout(roomCount: Int): Array<Where> {
@@ -67,21 +160,20 @@ class Generator(
         return layout
     }
 
-    private fun expandAccessible(io: Array<Where>): Boolean {
+    private fun expandAccessible(io: Array<Where>, from: Where, to: Where): Boolean {
         var expanded = true
         var updatedCells = 0
         while (expanded) {
             expanded = false
             for (f in io.indices) {
-                val x = f % sizeX
-                val y = f / sizeX
-                if (io[f] == Where.IN && (
-                    (y > 0 && io[f - sizeX] == Where.ACC) ||
-                    (y < (sizeY - 1) && io[f + sizeX] == Where.ACC) ||
-                    (x > 0 && io[f - 1] == Where.ACC) ||
-                    (x < (sizeX - 1) && io[f + 1] == Where.ACC)
+                val (x, y) = f.toCoords()
+                if (io[f] == from && (
+                    (y > 0 && io[f - sizeX] == to) ||
+                    (y < (sizeY - 1) && io[f + sizeX] == to) ||
+                    (x > 0 && io[f - 1] == to) ||
+                    (x < (sizeX - 1) && io[f + 1] == to)
                 )) {
-                    io[f] = Where.ACC
+                    io[f] = to
                     expanded = true
                     updatedCells++
                 }
@@ -107,4 +199,12 @@ class Generator(
     }
 
     class Room(val x: Int, val y: Int, val xs: Int, val ys: Int)
+
+    companion object {
+        val aroundCoords = listOf(
+            -1 to -1, -1 to 0, -1 to 1,
+            0 to -1, 0 to 1,
+            1 to -1, 1 to 0, 1 to 1
+        )
+    }
 }

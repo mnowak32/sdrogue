@@ -3,7 +3,11 @@ package pl.cdbr.sdrogue.game
 import com.badlogic.gdx.Input.Keys
 import com.badlogic.gdx.InputProcessor
 
-class KbdHandler(val state: State) : InputProcessor {
+class KbdHandler(private val state: State) : InputProcessor {
+    var shiftPressed = false
+    var ctrlPressed = false
+    var altPressed = false
+
     // Don't know which one to use for now...
     override fun keyDown(keycode: Int): Boolean {
         val evt = when (keycode) {
@@ -15,12 +19,20 @@ class KbdHandler(val state: State) : InputProcessor {
             Keys.NUMPAD_9 -> InputEvent.MOVE_NE
             Keys.NUMPAD_3 -> InputEvent.MOVE_SE
             Keys.NUMPAD_1 -> InputEvent.MOVE_SW
-//            Keys.NUMPAD_5, Keys.PERIOD -> InputEvent.MOVE_NONE
 
-            Keys.COMMA -> InputEvent.CLIMB_DOWN
-            Keys.PERIOD -> InputEvent.CLIMB_UP
+            Keys.COMMA -> if (shiftPressed) InputEvent.CLIMB_DOWN else null
+            Keys.PERIOD -> if (shiftPressed)
+                InputEvent.CLIMB_UP
+            else
+                InputEvent.MOVE_NONE
 
             Keys.ESCAPE -> InputEvent.CANCEL
+
+            //special (mod) keys
+            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { shiftPressed = true; null }
+            Keys.ALT_LEFT, Keys.ALT_RIGHT -> { altPressed = true; null }
+            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { ctrlPressed = true; null }
+
             else -> null
         }
 
@@ -32,7 +44,12 @@ class KbdHandler(val state: State) : InputProcessor {
         }
     }
     override fun keyTyped(character: Char) = false
-    override fun keyUp(keycode: Int) = false
+    override fun keyUp(keycode: Int) = when (keycode) {
+        Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { shiftPressed = false; true }
+        Keys.ALT_LEFT, Keys.ALT_RIGHT -> { altPressed = false; true }
+        Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { ctrlPressed = false; true }
+        else -> false
+    }
 
     // Non-keyboard events, let it go...
     override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int) = false
