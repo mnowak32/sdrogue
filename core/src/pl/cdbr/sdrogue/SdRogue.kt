@@ -7,13 +7,11 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
-import pl.cdbr.sdrogue.game.Engine
-import pl.cdbr.sdrogue.game.KbdHandler
-import pl.cdbr.sdrogue.game.State
+import pl.cdbr.sdrogue.game.*
 import pl.cdbr.sdrogue.game.graphics.Shapes
 import com.badlogic.gdx.utils.Array as GdxArray
 
-class SdRogue : ApplicationAdapter() {
+class SdRogue(val inp: InputHandler) : ApplicationAdapter() {
     private lateinit var batch: SpriteBatch
     private lateinit var renderer: ShapeRenderer
     private lateinit var shapes: Shapes
@@ -31,8 +29,6 @@ class SdRogue : ApplicationAdapter() {
 //    private var xStep = 0f
 //    private var moving = false
 
-    private var kbd = KbdHandler(st)
-
     override fun create() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
@@ -40,8 +36,9 @@ class SdRogue : ApplicationAdapter() {
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
+        inp.consumers += st
 
-        Gdx.input.inputProcessor = kbd
+        Gdx.input.inputProcessor = inp
     }
 
     override fun render() {
@@ -103,17 +100,17 @@ class SdRogue : ApplicationAdapter() {
     }
 
     private fun drawKeyState(batch: SpriteBatch) {
-        if (kbd.shiftPressed) batch.draw(shapes.keys[Shapes.Key.SHIFT],
+        if (inp.stateFlags.contains(InputFlag.SHIFT)) batch.draw(shapes.keys[Shapes.Key.SHIFT],
                 (gc.messageArea.offX + 0).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY
         )
-        if (kbd.ctrlPressed) batch.draw(shapes.keys[Shapes.Key.CTRL],
+        if (inp.stateFlags.contains(InputFlag.CTRL)) batch.draw(shapes.keys[Shapes.Key.CTRL],
                 (gc.messageArea.offX + 1).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY
         )
-        if (kbd.altPressed) batch.draw(shapes.keys[Shapes.Key.ALT],
+        if (inp.stateFlags.contains(InputFlag.ALT)) batch.draw(shapes.keys[Shapes.Key.ALT],
                 (gc.messageArea.offX + 2).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY

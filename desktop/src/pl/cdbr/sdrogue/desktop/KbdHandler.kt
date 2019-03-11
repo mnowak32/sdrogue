@@ -1,12 +1,11 @@
-package pl.cdbr.sdrogue.game
+package pl.cdbr.sdrogue.desktop
 
 import com.badlogic.gdx.Input.Keys
-import com.badlogic.gdx.InputProcessor
+import pl.cdbr.sdrogue.game.InputEvent
+import pl.cdbr.sdrogue.game.InputFlag
+import pl.cdbr.sdrogue.game.InputHandler
 
-class KbdHandler(private val state: State) : InputProcessor {
-    var shiftPressed = false
-    var ctrlPressed = false
-    var altPressed = false
+class KbdHandler : InputHandler() {
 
     // Don't know which one to use for now...
     override fun keyDown(keycode: Int): Boolean {
@@ -20,8 +19,8 @@ class KbdHandler(private val state: State) : InputProcessor {
             Keys.NUMPAD_3 -> InputEvent.MOVE_SE
             Keys.NUMPAD_1 -> InputEvent.MOVE_SW
 
-            Keys.COMMA -> if (shiftPressed) InputEvent.CLIMB_DOWN else null
-            Keys.PERIOD -> if (shiftPressed)
+            Keys.COMMA -> if (stateFlags.contains(InputFlag.SHIFT)) InputEvent.CLIMB_DOWN else null
+            Keys.PERIOD -> if (stateFlags.contains(InputFlag.SHIFT))
                 InputEvent.CLIMB_UP
             else
                 InputEvent.MOVE_NONE
@@ -29,15 +28,15 @@ class KbdHandler(private val state: State) : InputProcessor {
             Keys.ESCAPE -> InputEvent.CANCEL
 
             //special (mod) keys
-            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { shiftPressed = true; null }
-            Keys.ALT_LEFT, Keys.ALT_RIGHT -> { altPressed = true; null }
-            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { ctrlPressed = true; null }
+            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { stateFlags += InputFlag.SHIFT; null }
+            Keys.ALT_LEFT, Keys.ALT_RIGHT -> { stateFlags += InputFlag.ALT; null }
+            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { stateFlags += InputFlag.CTRL; null }
 
             else -> null
         }
 
         return if (evt != null) {
-            state.queueEvent(evt)
+            feed(evt)
             true
         } else {
             false
@@ -45,9 +44,9 @@ class KbdHandler(private val state: State) : InputProcessor {
     }
     override fun keyTyped(character: Char) = false
     override fun keyUp(keycode: Int) = when (keycode) {
-        Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { shiftPressed = false; true }
-        Keys.ALT_LEFT, Keys.ALT_RIGHT -> { altPressed = false; true }
-        Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { ctrlPressed = false; true }
+        Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { stateFlags -= InputFlag.SHIFT; true }
+        Keys.ALT_LEFT, Keys.ALT_RIGHT -> { stateFlags -= InputFlag.ALT; true }
+        Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { stateFlags -= InputFlag.CTRL; true }
         else -> false
     }
 

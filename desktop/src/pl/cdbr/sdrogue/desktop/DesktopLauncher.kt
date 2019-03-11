@@ -7,7 +7,7 @@ import pl.cdbr.sdrogue.SdRogue
 
 object DesktopLauncher {
     @JvmStatic
-    fun main(arg: Array<String>) {
+    fun main() {
         val config = LwjglApplicationConfiguration().apply {
             width = 1024
             height = 576
@@ -17,6 +17,7 @@ object DesktopLauncher {
             resizable = false
             addIcon("main icon.png", Files.FileType.Internal)
         }
-        LwjglApplication(SdRogue(), config)
+        val inp = KbdHandler()
+        LwjglApplication(SdRogue(inp), config)
     }
 }

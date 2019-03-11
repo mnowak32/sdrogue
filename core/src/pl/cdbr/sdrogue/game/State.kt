@@ -8,7 +8,8 @@ import pl.cdbr.sdrogue.game.map.MapLayer
 import java.util.*
 
 @Suppress("unused")
-class State {
+class State: InputEventConsumer {
+
     private val inputQueue: LinkedList<InputEvent> = LinkedList()
     var currentTick: Long = 0L
     private var isDirty: Boolean = false
@@ -38,6 +39,7 @@ class State {
         }
     }
 
+    override fun consume(evt: InputEvent) = queueEvent(evt)
 
     fun queueEvent(evt: InputEvent) {
         inputQueue.add(evt)
