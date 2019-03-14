@@ -29,26 +29,42 @@ class KbdHandler : InputHandler() {
             Keys.ESCAPE -> InputEvent.CANCEL
 
             //special (mod) keys
-            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { stateFlags += InputFlag.SHIFT; null }
-            Keys.ALT_LEFT, Keys.ALT_RIGHT -> { stateFlags += InputFlag.ALT; null }
-            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { stateFlags += InputFlag.CTRL; null }
+            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { stateFlags += InputFlag.SHIFT; InputEvent.K_SHIFT_D }
+            Keys.ALT_LEFT, Keys.ALT_RIGHT -> { stateFlags += InputFlag.ALT; InputEvent.K_ALT_D }
+            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { stateFlags += InputFlag.CTRL; InputEvent.K_CTRL_D }
 
             else -> null
         }
 
-        return if (evt != null) {
-            feed(evt, stateFlags)
-            true
-        } else {
-            false
-        }
+        return passEvent(evt)
     }
+
     override fun keyTyped(character: Char) = false
-    override fun keyUp(keycode: Int) = when (keycode) {
-        Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> { stateFlags -= InputFlag.SHIFT; true }
-        Keys.ALT_LEFT, Keys.ALT_RIGHT -> { stateFlags -= InputFlag.ALT; true }
-        Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> { stateFlags -= InputFlag.CTRL; true }
-        else -> false
+    override fun keyUp(keycode: Int): Boolean {
+        val evt = when (keycode) {
+            Keys.SHIFT_LEFT, Keys.SHIFT_RIGHT -> {
+                stateFlags -= InputFlag.SHIFT
+                InputEvent.K_SHIFT_U
+            }
+            Keys.ALT_LEFT, Keys.ALT_RIGHT -> {
+                stateFlags -= InputFlag.ALT
+                InputEvent.K_ALT_U
+            }
+            Keys.CONTROL_LEFT, Keys.CONTROL_RIGHT -> {
+                stateFlags -= InputFlag.CTRL
+                InputEvent.K_CTRL_U
+            }
+            else -> null
+        }
+
+        return passEvent(evt)
+    }
+
+    private fun passEvent(evt: InputEvent?) = if (evt != null) {
+        feed(evt)
+        true
+    } else {
+        false
     }
 
     // Non-keyboard events, let it go...

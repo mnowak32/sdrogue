@@ -26,5 +26,10 @@ enum class InputEvent(val doTurn: Boolean = true) {
     OPEN_INV(false), OPEN_EQUIP(false), OPEN_MENU(false),
 
     //
-    CANCEL(false)
+    CANCEL(false),
+
+    // internal
+    K_SHIFT_D(false), K_SHIFT_U(false),
+    K_CTRL_D(false), K_CTRL_U(false),
+    K_ALT_D(false), K_ALT_U(false),
 }

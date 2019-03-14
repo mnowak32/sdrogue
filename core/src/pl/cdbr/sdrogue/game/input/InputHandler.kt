@@ -19,13 +19,13 @@ abstract class InputHandler: InputProcessor {
     override fun mouseMoved(screenX: Int, screenY: Int) = false
     override fun scrolled(amount: Int) = false
 
-    protected fun feed(ev: InputEvent, flags: Set<InputFlag> = emptySet()) {
-        consumers.forEach { it.consume(ev, flags) }
+    protected fun feed(ev: InputEvent) {
+        consumers.forEach { it.consume(ev) }
     }
 }
 
 interface InputEventConsumer {
-    fun consume(evt: InputEvent, flags: Set<InputFlag>)
+    fun consume(evt: InputEvent)
 }
 
 enum class InputFlag { SHIFT, CTRL, ALT, TWO_FINGER }

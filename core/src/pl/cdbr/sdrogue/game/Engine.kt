@@ -3,6 +3,7 @@ package pl.cdbr.sdrogue.game
 import com.badlogic.gdx.Gdx
 import pl.cdbr.sdrogue.GameConfig
 import pl.cdbr.sdrogue.game.input.InputEvent
+import pl.cdbr.sdrogue.game.input.InputFlag
 
 class Engine(private val st: State, private val gc: GameConfig) {
     fun tick() {
@@ -36,6 +37,29 @@ class Engine(private val st: State, private val gc: GameConfig) {
 
             InputEvent.CANCEL
                     -> doCancel()
+
+            InputEvent.K_SHIFT_D,
+            InputEvent.K_SHIFT_U,
+            InputEvent.K_CTRL_D,
+            InputEvent.K_CTRL_U,
+            InputEvent.K_ALT_D,
+            InputEvent.K_ALT_U
+                -> doInternal(ev)
+
+            else -> {}
+        }
+    }
+
+    private fun doInternal(ev: InputEvent) {
+        when (ev) {
+            InputEvent.K_SHIFT_D -> st.inputFlags += InputFlag.SHIFT
+            InputEvent.K_SHIFT_U -> st.inputFlags -= InputFlag.SHIFT
+            InputEvent.K_CTRL_D -> st.inputFlags += InputFlag.CTRL
+            InputEvent.K_CTRL_U -> st.inputFlags -= InputFlag.CTRL
+            InputEvent.K_ALT_D -> st.inputFlags += InputFlag.ALT
+            InputEvent.K_ALT_U -> st.inputFlags -= InputFlag.ALT
+
+            else -> {}
         }
     }
 

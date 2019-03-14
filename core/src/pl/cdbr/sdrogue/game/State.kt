@@ -44,8 +44,7 @@ class State: InputEventConsumer {
         }
     }
 
-    override fun consume(evt: InputEvent, flags: Set<InputFlag>) {
-        inputFlags = flags
+    override fun consume(evt: InputEvent) {
         queueEvent(evt)
     }
 
