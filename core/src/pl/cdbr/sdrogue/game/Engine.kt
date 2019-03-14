@@ -2,6 +2,7 @@ package pl.cdbr.sdrogue.game
 
 import com.badlogic.gdx.Gdx
 import pl.cdbr.sdrogue.GameConfig
+import pl.cdbr.sdrogue.game.input.InputEvent
 
 class Engine(private val st: State, private val gc: GameConfig) {
     fun tick() {

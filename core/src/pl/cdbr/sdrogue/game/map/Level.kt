@@ -12,7 +12,7 @@ data class Level(val num: Int, val type: LevelType) {
 
     private fun bossMap() = dungeonMap()
 
-    private fun arenaMap() = parametrizedMap(1, (GameConfig.levelBaseSize + num * GameConfig.levelScalingFactor) / 2)
+    private fun arenaMap() = parametrizedMap(1, (GameConfig.levelBaseSize + num * GameConfig.levelScalingFactor) / 3)
     private fun dungeonMap() = parametrizedMap(80, 6)
     private fun cavernMap() = parametrizedMap(50, 4)
 

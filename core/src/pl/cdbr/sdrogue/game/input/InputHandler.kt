@@ -1,9 +1,8 @@
-package pl.cdbr.sdrogue.game
+package pl.cdbr.sdrogue.game.input
 
 import com.badlogic.gdx.InputProcessor
 
 abstract class InputHandler: InputProcessor {
-    val stateFlags = mutableSetOf<InputFlag>()
     val consumers = mutableListOf<InputEventConsumer>()
 
     //keyboard
@@ -20,13 +19,13 @@ abstract class InputHandler: InputProcessor {
     override fun mouseMoved(screenX: Int, screenY: Int) = false
     override fun scrolled(amount: Int) = false
 
-    protected fun feed(ev: InputEvent) {
-        consumers.forEach { it.consume(ev) }
+    protected fun feed(ev: InputEvent, flags: Set<InputFlag> = emptySet()) {
+        consumers.forEach { it.consume(ev, flags) }
     }
 }
 
 interface InputEventConsumer {
-    fun consume(evt: InputEvent)
+    fun consume(evt: InputEvent, flags: Set<InputFlag>)
 }
 
 enum class InputFlag { SHIFT, CTRL, ALT, TWO_FINGER }

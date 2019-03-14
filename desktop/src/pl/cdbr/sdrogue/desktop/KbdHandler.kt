@@ -1,11 +1,12 @@
 package pl.cdbr.sdrogue.desktop
 
 import com.badlogic.gdx.Input.Keys
-import pl.cdbr.sdrogue.game.InputEvent
-import pl.cdbr.sdrogue.game.InputFlag
-import pl.cdbr.sdrogue.game.InputHandler
+import pl.cdbr.sdrogue.game.input.InputEvent
+import pl.cdbr.sdrogue.game.input.InputFlag
+import pl.cdbr.sdrogue.game.input.InputHandler
 
 class KbdHandler : InputHandler() {
+    private val stateFlags = mutableSetOf<InputFlag>()
 
     // Don't know which one to use for now...
     override fun keyDown(keycode: Int): Boolean {
@@ -36,7 +37,7 @@ class KbdHandler : InputHandler() {
         }
 
         return if (evt != null) {
-            feed(evt)
+            feed(evt, stateFlags)
             true
         } else {
             false

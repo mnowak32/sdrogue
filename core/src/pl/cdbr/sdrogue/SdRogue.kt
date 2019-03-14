@@ -9,9 +9,12 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import pl.cdbr.sdrogue.GameConfig.toAbsValue
 import pl.cdbr.sdrogue.game.*
 import pl.cdbr.sdrogue.game.graphics.Shapes
+import pl.cdbr.sdrogue.game.input.InputFlag
+import pl.cdbr.sdrogue.game.input.InputHandler
+import pl.cdbr.sdrogue.game.input.MultiInputProcessor
 import com.badlogic.gdx.utils.Array as GdxArray
 
-class SdRogue(val inp: InputHandler) : ApplicationAdapter() {
+class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
     private lateinit var batch: SpriteBatch
     private lateinit var renderer: ShapeRenderer
     private lateinit var shapes: Shapes
@@ -19,6 +22,7 @@ class SdRogue(val inp: InputHandler) : ApplicationAdapter() {
     private val gc = GameConfig
     private val st = State()
     private val eng = Engine(st, gc)
+    private val multiInput = MultiInputProcessor(inp.toList())
 
     private var gridX: Float = 1f
     private var gridY: Float = 1f
@@ -36,9 +40,9 @@ class SdRogue(val inp: InputHandler) : ApplicationAdapter() {
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
-        inp.consumers += st
+        inp.forEach { it.consumers += st }
 
-        Gdx.input.inputProcessor = inp
+        Gdx.input.inputProcessor = multiInput
     }
 
     override fun render() {
@@ -100,17 +104,17 @@ class SdRogue(val inp: InputHandler) : ApplicationAdapter() {
     }
 
     private fun drawKeyState(batch: SpriteBatch) {
-        if (inp.stateFlags.contains(InputFlag.SHIFT)) batch.draw(shapes.keys[Shapes.Key.SHIFT],
+        if (st.inputFlags.contains(InputFlag.SHIFT)) batch.draw(shapes.keys[Shapes.Key.SHIFT],
                 (gc.messageArea.offX + 0).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY
         )
-        if (inp.stateFlags.contains(InputFlag.CTRL)) batch.draw(shapes.keys[Shapes.Key.CTRL],
+        if (st.inputFlags.contains(InputFlag.CTRL)) batch.draw(shapes.keys[Shapes.Key.CTRL],
                 (gc.messageArea.offX + 1).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY
         )
-        if (inp.stateFlags.contains(InputFlag.ALT)) batch.draw(shapes.keys[Shapes.Key.ALT],
+        if (st.inputFlags.contains(InputFlag.ALT)) batch.draw(shapes.keys[Shapes.Key.ALT],
                 (gc.messageArea.offX + 2).toAbsValue(gridX),
                 (gc.messageArea.offY + 0).toAbsValue(gridY),
                 gridX, gridY

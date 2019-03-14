@@ -1,4 +1,4 @@
-package pl.cdbr.sdrogue.game
+package pl.cdbr.sdrogue.game.input
 
 /**
  * Various user-triggered events.

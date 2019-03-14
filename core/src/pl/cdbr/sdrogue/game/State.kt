@@ -2,13 +2,18 @@ package pl.cdbr.sdrogue.game
 
 import com.badlogic.gdx.graphics.Color
 import pl.cdbr.sdrogue.GameConfig
+import pl.cdbr.sdrogue.game.input.InputEvent
+import pl.cdbr.sdrogue.game.input.InputEventConsumer
+import pl.cdbr.sdrogue.game.input.InputFlag
 import pl.cdbr.sdrogue.game.map.LayerId
 import pl.cdbr.sdrogue.game.map.Level
-import pl.cdbr.sdrogue.game.map.MapLayer
 import java.util.*
 
 @Suppress("unused")
 class State: InputEventConsumer {
+
+    val messages = mutableListOf<String>()
+    var inputFlags: Set<InputFlag> = emptySet()
 
     private val inputQueue: LinkedList<InputEvent> = LinkedList()
     var currentTick: Long = 0L
@@ -39,7 +44,10 @@ class State: InputEventConsumer {
         }
     }
 
-    override fun consume(evt: InputEvent) = queueEvent(evt)
+    override fun consume(evt: InputEvent, flags: Set<InputFlag>) {
+        inputFlags = flags
+        queueEvent(evt)
+    }
 
     fun queueEvent(evt: InputEvent) {
         inputQueue.add(evt)

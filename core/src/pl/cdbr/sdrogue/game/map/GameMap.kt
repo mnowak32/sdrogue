@@ -33,7 +33,7 @@ enum class LayerId {
 }
 
 enum class MapTile(val glyph: String, val color: Color, val passable: Boolean = true) {
-    GRASS(",", Color.OLIVE),
+    GRASS(" ", Color.OLIVE),
     WALL("#", Color.DARK_GRAY, false),
     DIRT("^", Color.BROWN),
     FLOOR_STONE(".", Color.LIGHT_GRAY),
