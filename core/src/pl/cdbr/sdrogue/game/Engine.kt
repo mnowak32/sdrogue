@@ -5,7 +5,7 @@ import pl.cdbr.sdrogue.GameConfig
 import pl.cdbr.sdrogue.game.input.InputEvent
 import pl.cdbr.sdrogue.game.input.InputFlag
 
-class Engine(private val st: State, private val gc: GameConfig) {
+class Engine(private val st: State) {
     fun tick() {
         if (st.eventWaiting()) {
             val ev = st.event()

@@ -21,7 +21,7 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
 
     private val gc = GameConfig
     private val st = State()
-    private val eng = Engine(st, gc)
+    private val eng = Engine(st)
     private val multiInput = MultiInputProcessor(inp.toList())
 
     private var gridX: Float = 1f
