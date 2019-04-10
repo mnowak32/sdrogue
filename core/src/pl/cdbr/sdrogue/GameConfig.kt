@@ -15,17 +15,35 @@ object GameConfig {
     val messageArea: ScreenRegion = ScreenRegion(0, 0, 32, 2)
 
     //animation parameters
-    val playerAnimFrameTime = 0.06f
-    val playerMoveTime = 0.24f
+    const val playerAnimFrameTime = 0.06f
+//    const val playerMoveTime = 0.24f
 
 
-    data class ScreenRegion(val offX: Int, val offY: Int, val width: Int, val height: Int) {
+    class ScreenRegion(val offX: Int, val offY: Int, val width: Int, val height: Int) {
+        val maxX = offX + width - 1
+        val maxY = offY + height - 1
 
+        fun scaled(gridX: Float, gridY: Float) = ScaledScreenRegion(this, gridX, gridY)
     }
+
+    class ScaledScreenRegion(val sr: ScreenRegion, val gridX: Float, val gridY: Float) {
+        val offX = sr.offX.toAbsValue(gridX)
+        val offY = sr.offY.toAbsValue(gridY)
+        val width = sr.width.toAbsValue(gridX)
+        val height = sr.height.toAbsValue(gridY)
+
+        fun at(x: Int, y: Int): Pair<Float, Float> {
+            return (sr.offX + x).toAbsValue(gridX) to (sr.offY + y).toAbsValue(gridY)
+        }
+        fun atRev(x: Int, y: Int): Pair<Float, Float> {
+            return (sr.maxX - x).toAbsValue(gridX) to (sr.maxY - y).toAbsValue(gridY)
+        }
+    }
+
     fun Int.toAbsValue(gridDim: Float) = this * gridDim
 
     val levels = listOf(
-            Level(0, LevelType.DUNGEON),
+            Level(0, LevelType.DUNGEON, -0x42d2b5b5629cae34),
             Level(1, LevelType.CAVERN),
             Level(2, LevelType.DUNGEON),
             Level(3, LevelType.ARENA),
@@ -43,6 +61,6 @@ object GameConfig {
             Level(15, LevelType.BOSS)
     )
 
-    val levelBaseSize = 24
-    val levelScalingFactor = 4
+    const val levelBaseSize = 24
+    const val levelScalingFactor = 4
 }

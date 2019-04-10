@@ -81,6 +81,10 @@ class State: InputEventConsumer {
         return map.layers[LayerId.GROUND]?.tileAt(tx, ty)?.color ?: Color.BLACK
     }
 
+    fun mapCharAt(tx: Int, ty: Int): String {
+        return map.layers[LayerId.GROUND]?.tileAt(tx, ty)?.glyph ?: " "
+    }
+
     fun mapOffset(): Pair<Int, Int> {
         val maxOffX = map.sx - GameConfig.playArea.width
         val maxOffY = map.sy - GameConfig.playArea.height

@@ -4,9 +4,10 @@ import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
-import pl.cdbr.sdrogue.GameConfig.toAbsValue
 import pl.cdbr.sdrogue.game.*
 import pl.cdbr.sdrogue.game.graphics.Shapes
 import pl.cdbr.sdrogue.game.input.InputFlag
@@ -18,6 +19,7 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
     private lateinit var batch: SpriteBatch
     private lateinit var renderer: ShapeRenderer
     private lateinit var shapes: Shapes
+    private lateinit var textFont: BitmapFont
 
     private val gc = GameConfig
     private val st = State()
@@ -33,6 +35,10 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
 //    private var xStep = 0f
 //    private var moving = false
 
+    private lateinit var invArea: GameConfig.ScaledScreenRegion
+    private lateinit var playArea: GameConfig.ScaledScreenRegion
+    private lateinit var mesgArea: GameConfig.ScaledScreenRegion
+
     override fun create() {
         batch = SpriteBatch()
         renderer = ShapeRenderer()
@@ -40,9 +46,17 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
 
         gridX = Gdx.graphics.width / 32f
         gridY = Gdx.graphics.height / 18f
+        invArea = gc.inventoryArea.scaled(gridX, gridY)
+        playArea = gc.playArea.scaled(gridX, gridY)
+        mesgArea = gc.messageArea.scaled(gridX, gridY)
+
         inp.forEach { it.consumers += st }
 
         Gdx.input.inputProcessor = multiInput
+
+        val fontGen = FreeTypeFontGenerator(Gdx.files.internal("fonts/EnterCommand-Bold.ttf"))
+        textFont = fontGen.generateFont(FreeTypeFontGenerator.FreeTypeFontParameter().apply { size = gridY.toInt() })
+        fontGen.dispose()
     }
 
     override fun render() {
@@ -53,8 +67,9 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
         timer += Gdx.graphics.deltaTime
         renderer.begin(ShapeRenderer.ShapeType.Filled)
 
-        coloredRegion(gc.inventoryArea, Color.BLACK)
-        coloredRegion(gc.messageArea, Color.BROWN)
+        coloredRegion(invArea, Color.BLACK)
+        coloredRegion(playArea, Color.BLACK)
+        coloredRegion(mesgArea, Color.BROWN)
 
         val (viewX, viewY) = st.mapOffset()
 
@@ -63,14 +78,25 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
             for (tn in 0..gridCount) {
                 val tx = tn % this.width
                 val ty = tn / this.width
-                val tile = GameConfig.ScreenRegion(this.offX + tx, this.offY + ty, 1, 1)
-                val col = st.mapColorAt(tx + viewX, ty + viewY)
-                coloredRegion(tile, col)
+                val tilePos = playArea.at(tx, ty)
+                renderer.color = st.mapColorAt(tx + viewX, ty + viewY)
+                renderer.rect(tilePos.first, tilePos.second, gridX, gridY)
             }
         }
         renderer.end()
 
         batch.begin()
+
+//        gc.playArea.apply {
+//            val gridCount = this.width * this.height
+//            for (tn in 0..gridCount) {
+//                val tx = tn % this.width
+//                val ty = tn / this.width
+//                val charPos = playArea.at(tx, ty + 1)
+//                textFont.draw(batch, st.mapCharAt(tx + viewX, ty + viewY), charPos.first + 4, charPos.second - 2)
+//            }
+//        }
+
 //        if (!moving && timer - lastStepTimer > 1f) {
 //            moving = true
 //            lastStepTimer = timer
@@ -92,41 +118,39 @@ class SdRogue(private vararg val inp: InputHandler) : ApplicationAdapter() {
 //                (gc.playArea.offX + xPos).toAbsValue(gridX) + (xStep * gridX),
 //                gc.playArea.offY.toAbsValue(gridY), gridX, gridY
 //        )
-        batch.draw(shapes.player,
-                (gc.playArea.offX + st.player.x - viewX).toAbsValue(gridX),
-                (gc.playArea.offY + st.player.y - viewY).toAbsValue(gridY),
-                gridX, gridY
-            )
+        val playerPos = playArea.at(st.player.x - viewX, st.player.y - viewY)
+        batch.draw(shapes.player, playerPos.first, playerPos.second, gridX, gridY)
 
         drawKeyState(batch)
+
+        val textPos = mesgArea.at(0, 2)
+        textFont.draw(batch, "Hello Adventurer!", textPos.first, textPos.second)
 
         batch.end()
     }
 
     private fun drawKeyState(batch: SpriteBatch) {
+        val shiftPos = mesgArea.atRev(2, 0)
+        val ctrlPos = mesgArea.atRev(1, 0)
+        val altPos = mesgArea.atRev(0, 0)
         if (st.inputFlags.contains(InputFlag.SHIFT)) batch.draw(shapes.keys[Shapes.Key.SHIFT],
-                (gc.messageArea.offX + 0).toAbsValue(gridX),
-                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                shiftPos.first, shiftPos.second,
                 gridX, gridY
         )
         if (st.inputFlags.contains(InputFlag.CTRL)) batch.draw(shapes.keys[Shapes.Key.CTRL],
-                (gc.messageArea.offX + 1).toAbsValue(gridX),
-                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                ctrlPos.first, ctrlPos.second,
                 gridX, gridY
         )
         if (st.inputFlags.contains(InputFlag.ALT)) batch.draw(shapes.keys[Shapes.Key.ALT],
-                (gc.messageArea.offX + 2).toAbsValue(gridX),
-                (gc.messageArea.offY + 0).toAbsValue(gridY),
+                altPos.first, altPos.second,
                 gridX, gridY
         )
 
     }
 
-    private fun coloredRegion(reg: GameConfig.ScreenRegion, c: Color) {
+    private fun coloredRegion(reg: GameConfig.ScaledScreenRegion, c: Color) {
         renderer.color = c
-        renderer.rect(reg.offX.toAbsValue(gridX), reg.offY.toAbsValue(gridY),
-                reg.width.toAbsValue(gridX), reg.height.toAbsValue(gridY)
-        )
+        renderer.rect(reg.offX, reg.offY, reg.width, reg.height)
     }
 
     override fun dispose() {

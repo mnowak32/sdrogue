@@ -126,4 +126,5 @@ Thumbs.db
 
 # libgdx directories
 /out/
+/out/*
 

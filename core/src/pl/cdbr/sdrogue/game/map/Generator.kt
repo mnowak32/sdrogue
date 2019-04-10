@@ -8,15 +8,17 @@ class Generator(
         private val sizeX: Int,
         private val sizeY: Int,
         private val roomDensity: Int,
-        private val roomSize: Int
+        private val roomSize: Int,
+        private val seed: Long
 ) {
     val startX = sizeX / 2
     val startY = sizeY / 2
-    private val rnd = Random()
+    private val rnd = Random(seed)
 
     enum class Where { IN, WALL, OUT, ACC, WORK, MARK }
 
     fun ground(): MapLayer {
+        println("Level seed is: ${seed.toString(16)}")
         println("Generating ground layer with size: $sizeX x $sizeY")
         val roomCount = ((sizeX / 6) * (sizeY / 6) * roomDensity / 100) * (60 + rnd.nextInt(40)) / 100
         println("Room count is $roomCount")
@@ -30,7 +32,7 @@ class Generator(
         expandAccessible(floorLayout, Where.IN, Where.ACC)
 
         //find inaccesible tiles and connect them to the rest
-        var inAccessTileIdx = floorLayout.indexOfFirst { it == Where.IN }
+        var inAccessTileIdx = floorLayout.indexOfAny { it == Where.IN }
         while (inAccessTileIdx > -1) { //there still are inaccessible rooms
             println("Map STILL contains INACCESSIBLE locations!!! (idx: $inAccessTileIdx)")
             //mark "inAccessTile" as WORKing area
@@ -51,7 +53,7 @@ class Generator(
                 } //else shouldn't happen EVER - we already worked it out from the oter side!
             }
             //update the inaccesibe room indicator
-            inAccessTileIdx = floorLayout.indexOfFirst { it == Where.IN }
+            inAccessTileIdx = floorLayout.indexOfAny { it == Where.IN }
         }
 
         val layer = MapLayer(sizeX, sizeY, floorLayout.map {
@@ -65,6 +67,13 @@ class Generator(
         })
         println(layer)
         return layer
+    }
+
+    private fun <T> Array<T>.indexOfAny(check: (T) -> Boolean): Int {
+        //find all indices matching the criteria
+        val foundIdx = this.mapIndexedNotNull { i, t -> if (check(t)) i else null }
+        //if none found, return -1, otherwise random index from list
+        return if (foundIdx.isEmpty()) -1 else { foundIdx.shuffled(rnd).first() }
     }
 
     private fun corridorBetween(fl: Array<Where>, t1: Pair<Int, Int>, t2: Pair<Int, Int>) {
@@ -128,6 +137,7 @@ class Generator(
         return nearest?.first
     }
 
+    @Suppress("SameParameterValue")
     private fun findCenterOf(fl: Array<Where>, what: Where): Pair<Int, Int> {
         //find all indexes in the array that are "what"
         val idxs = fl.mapIndexedNotNull { i, w -> if (w == what) { i } else { null } }
